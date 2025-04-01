@@ -96,4 +96,10 @@ int64_t OTSYS_TIME();
 
 SpellGroup_t stringToSpellGroup(const std::string& value);
 
+////fmt para funcionar no windows
+template < typename E >
+auto format_as(E e) {
+return fmt::underlying(e);
+}
+
 #endif
