@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Barbarian Brutetamer" nameDescription="a barbarian brutetamer" race="blood" experience="90" speed="190">
+<monster name="Barbarian Brutetamer" nameDescription="a barbarian brutetamer" race="blood" experience="90" speed="190" raceId="332">
 	<health now="145" max="145" />
 	<look type="264" head="78" body="97" legs="95" feet="121" corpse="20339" />
 	<targetchange interval="60000" chance="0" />
@@ -23,7 +23,6 @@
 		<attack name="physical" interval="2000" chance="20" range="7" radius="1" target="1" min="0" max="-34">
 			<attribute key="shootEffect" value="snowball" />
 		</attack>
-		<attack name="barbarian brutetamer skill reducer" range="5" interval="2000" chance="15" />
 	</attacks>
 	<defenses armor="10" defense="10">
 		<defense name="healing" interval="2000" chance="40" min="50" max="80">
@@ -57,7 +56,6 @@
 		<item id="2401" chance="6500" /><!-- staff -->
 		<item name="chain armor" chance="8900" />
 		<item name="corncob" countmax="2" chance="11000" />
-		<item name="hunting spear" chance="5250" />
 		<item name="fur bag" chance="7540" />
 		<item name="brutetamer's staff" chance="380" />
 		<item name="fur boots" chance="160" />

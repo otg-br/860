@@ -36,14 +36,11 @@ local reloadTypes = {
 	["npc"] = RELOAD_TYPE_NPCS,
 	["npcs"] = RELOAD_TYPE_NPCS,
 
-	["quest"] = RELOAD_TYPE_QUESTS,
-	["quests"] = RELOAD_TYPE_QUESTS,
-
 	["raid"] = RELOAD_TYPE_RAIDS,
 	["raids"] = RELOAD_TYPE_RAIDS,
 
 	["spell"] = RELOAD_TYPE_SPELLS,
-	["spells"] =  RELOAD_TYPE_SPELLS,
+	["spells"] = RELOAD_TYPE_SPELLS,
 
 	["talk"] = RELOAD_TYPE_TALKACTIONS,
 	["talkaction"] = RELOAD_TYPE_TALKACTIONS,
@@ -57,28 +54,47 @@ local reloadTypes = {
 }
 
 function onSay(player, words, param)
-	if not player:getGroup():getAccess() then
-		return true
-	end
-
-	if player:getAccountType() < ACCOUNT_TYPE_GOD then
-		return false
-	end
-
 	logCommand(player, words, param)
 
-	local reloadType = reloadTypes[param:lower()]
+	local paramToLower = param:lower()
+	local reloadType = reloadTypes[paramToLower]
 	if not reloadType then
 		player:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, "Reload type not found.")
 		return false
 	end
 
+	-- call to Event.onReload
+	if hasEvent.onReload then Event.onReload(player, reloadType) end
+
 	-- need to clear EventCallback.data or we end up having duplicated events on /reload scripts
 	if table.contains({RELOAD_TYPE_SCRIPTS, RELOAD_TYPE_ALL}, reloadType) then
-		EventCallback:clear()
+		Event:clear()
+		Game.clearQuests()
 	end
 
-	Game.reload(reloadType)
-	player:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, string.format("Reloaded %s.", param:lower()))
+	local description = {}
+	local reloaded, scriptsLib = Game.reload(reloadType)
+	if reloadType == RELOAD_TYPE_GLOBAL then
+		-- we need to reload the scripts as well
+		if not Game.reload(RELOAD_TYPE_SCRIPTS) then
+			description[#description + 1] = "Failed to reload scripts."
+		else
+			description[#description + 1] = "Reloaded scripts."
+		end
+
+		if not scriptsLib then
+			description[#description + 1] = "Failed to reload script libs."
+		else
+			description[#description + 1] = "Reloaded script libs."
+		end
+	end
+
+	if not reloaded then
+		description[#description + 1] = string.format("Failed to reload %s.", paramToLower)
+	else
+		description[#description + 1] = string.format("Reloaded %s.", paramToLower)
+	end
+
+	for _, desc in ipairs(description) do player:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, desc) end
 	return false
 end

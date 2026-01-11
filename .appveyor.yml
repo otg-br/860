@@ -1,0 +1,53 @@
+version: '{build}'
+image: Visual Studio 2022
+shallow_clone: true
+
+platform:
+  - x64
+
+configuration:
+  - Release
+
+matrix:
+  fast_finish: false
+
+only_commits:
+  files:
+    - /src/
+    - /vc17/
+    - .appveyor.yml
+    - /cmake/
+
+environment:
+  VCPKG_ROOT: C:\Tools\vcpkg
+  VCPKG_DEFAULT_TRIPLET: x64-windows
+
+install:
+  - cmd: vcpkg install
+
+before_build:
+  - if not exist build mkdir build
+  - cd build
+  - cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
+
+build:
+  parallel: true
+
+build_script:
+  - cmake --build . --config %CONFIGURATION% --parallel
+
+after_build:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - 7z a -tzip TFS.zip -r .\build\%CONFIGURATION%\*.exe -ir!.\build\%CONFIGURATION%\*.dll
+
+cache:
+  - c:\tools\vcpkg\installed\
+
+artifacts:
+  - path: build\**\tfs*.exe
+  - path: build\**\*.dll
+  - path: TFS.zip
+
+test: off
+
+deploy: off

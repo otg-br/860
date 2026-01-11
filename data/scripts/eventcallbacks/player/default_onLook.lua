@@ -1,7 +1,14 @@
-local ec = EventCallback
+local event = Event()
+event.onLook = function(self, thing, position, distance, description)
+	local description = "You see "
 
-ec.onLook = function(self, thing, position, distance, description)
-	local description = "You see " .. thing:getDescription(distance)
+	if thing:isItem() then
+		description = description .. thing:getDescription(distance)
+		
+	else
+		description = description .. thing:getDescription(distance)
+	end
+
 	if self:getGroup():getAccess() then
 		if thing:isItem() then
 			description = string.format("%s\nItem ID: %d", description, thing:getId())
@@ -30,6 +37,7 @@ ec.onLook = function(self, thing, position, distance, description)
 			if decayId ~= -1 then
 				description = string.format("%s\nDecays to: %d", description, decayId)
 			end
+			
 		elseif thing:isCreature() then
 			local str = "%s\nHealth: %d / %d"
 			if thing:isPlayer() and thing:getMaxMana() > 0 then
@@ -46,11 +54,11 @@ ec.onLook = function(self, thing, position, distance, description)
 
 		if thing:isCreature() then
 			if thing:isPlayer() then
+			    description = string.format("%s\nGUID: %s", description, thing:getGuid())
 				description = string.format("%s\nIP: %s.", description, Game.convertIpToString(thing:getIp()))
 			end
 		end
 	end
 	return description
 end
-
-ec:register()
+event:register()

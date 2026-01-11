@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Massive Energy Elemental" nameDescription="a massive energy elemental" race="energy" experience="950" speed="210">
+<monster name="Massive Energy Elemental" nameDescription="a massive energy elemental" race="energy" experience="950" speed="210" raceId="456">
 	<health now="1100" max="1100" />
 	<look type="290" corpse="8966" />
 	<targetchange interval="4000" chance="15" />
@@ -25,9 +25,6 @@
 		<attack name="energy" interval="2000" chance="15" range="7" target="1" min="-175" max="-205">
 			<attribute key="shootEffect" value="energyball" />
 			<attribute key="areaEffect" value="energy" />
-		</attack>
-		<attack name="massive energy elemental electrify" interval="2000" chance="20">
-			<attribute key="areaEffect" value="yellowspark" />
 		</attack>
 	</attacks>
 	<defenses armor="20" defense="20">

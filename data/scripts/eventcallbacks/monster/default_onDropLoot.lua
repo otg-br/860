@@ -1,9 +1,7 @@
-local ec = EventCallback
+local event = Event()
 
-ec.onDropLoot = function(self, corpse)
-	if configManager.getNumber(configKeys.RATE_LOOT) == 0 then
-		return
-	end
+event.onDropLoot = function(self, corpse)
+	if configManager.getNumber(configKeys.RATE_LOOT) == 0 then return end
 
 	local player = Player(corpse:getCorpseOwner())
 	local mType = self:getType()
@@ -12,12 +10,13 @@ ec.onDropLoot = function(self, corpse)
 		for i = 1, #monsterLoot do
 			local item = corpse:createLootItem(monsterLoot[i])
 			if not item then
-				print('[Warning] DropLoot:', 'Could not add loot item to corpse.')
+				print("[Warning] DropLoot:", "Could not add loot item to corpse.")
 			end
 		end
 
 		if player then
-			local text = ("Loot of %s: %s"):format(mType:getNameDescription(), corpse:getContentDescription())
+			local text = ("Loot of %s: %s"):format(mType:getNameDescription(),
+			                                       corpse:getContentDescription())
 			local party = player:getParty()
 			if party then
 				party:broadcastPartyLoot(text)
@@ -26,7 +25,8 @@ ec.onDropLoot = function(self, corpse)
 			end
 		end
 	else
-		local text = ("Loot of %s: nothing (due to low stamina)"):format(mType:getNameDescription())
+		local text = ("Loot of %s: nothing (due to low stamina)"):format(
+			             mType:getNameDescription())
 		local party = player:getParty()
 		if party then
 			party:broadcastPartyLoot(text)
@@ -36,4 +36,4 @@ ec.onDropLoot = function(self, corpse)
 	end
 end
 
-ec:register()
+event:register()

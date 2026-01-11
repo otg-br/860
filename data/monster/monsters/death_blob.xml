@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<monster name="Death Blob" nameDescription="a death blob" race="undead" experience="300" speed="180">
+<monster name="Death Blob" nameDescription="a death blob" race="undead" experience="300" speed="180" raceId="514">
 	<health now="320" max="320" />
 	<look type="315" corpse="9960" />
 	<targetchange interval="5000" chance="0" />
@@ -23,7 +23,6 @@
 		<attack name="physical" interval="2000" chance="25" range="3" radius="4" target="0" min="-35" max="-60">
 			<attribute key="areaEffect" value="poff" />
 		</attack>
-		<attack name="death blob curse" interval="2000" range="5" chance="5" />
 	</attacks>
 	<defenses armor="15" defense="15">
 		<defense name="healing" interval="2000" chance="5" min="20" max="30">

@@ -6,9 +6,7 @@ function Player.feed(self, food)
 		condition:setTicks(condition:getTicks() + (food * 1000))
 	else
 		local vocation = self:getVocation()
-		if not vocation then
-			return nil
-		end
+		if not vocation then return nil end
 
 		foodCondition:setTicks(food * 1000)
 		foodCondition:setParameter(CONDITION_PARAM_HEALTHGAIN, vocation:getHealthGainAmount())
@@ -22,9 +20,7 @@ function Player.feed(self, food)
 end
 
 function Player.getClosestFreePosition(self, position, extended)
-	if self:getGroup():getAccess() and self:getAccountType() >= ACCOUNT_TYPE_GOD then
-		return position
-	end
+	if self:getGroup():getAccess() and self:getAccountType() >= ACCOUNT_TYPE_GOD then return position end
 	return Creature.getClosestFreePosition(self, position, extended)
 end
 
@@ -32,32 +28,32 @@ function Player.getDepotItems(self, depotId)
 	return self:getDepotChest(depotId, true):getItemHoldingCount()
 end
 
-function Player.hasFlag(self, flag)
-	return self:getGroup():hasFlag(flag)
-end
+function Player.hasFlag(self, flag) return self:getGroup():hasFlag(flag) end
 
 function Player.getLossPercent(self)
 	local blessings = 0
-	local lossPercent = {
-		[0] = 100,
-		[1] = 70,
-		[2] = 45,
-		[3] = 25,
-		[4] = 10,
-		[5] = 0
-	}
-
+	local blessingNames = {"First", "Second", "Third", "Fourth", "Fifth"}
+	local hasBlessings = {}
+	
 	for i = 1, 5 do
 		if self:hasBlessing(i) then
 			blessings = blessings + 1
+			hasBlessings[i] = true
+		else
+			hasBlessings[i] = false
 		end
 	end
-	return lossPercent[blessings]
+	
+	local blessingReduction = blessings * 8
+	
+	local basePenalty = self:getDeathPenalty()
+	
+	local finalPenalty = math.max(0, basePenalty - blessingReduction)
+	
+	return finalPenalty
 end
 
-function Player.getPremiumTime(self)
-	return math.max(0, self:getPremiumEndsAt() - os.time())
-end
+function Player.getPremiumTime(self) return math.max(0, self:getPremiumEndsAt() - os.time()) end
 
 function Player.setPremiumTime(self, seconds)
 	self:setPremiumEndsAt(os.time() + seconds)
@@ -71,90 +67,57 @@ end
 
 function Player.removePremiumTime(self, seconds)
 	local currentTime = self:getPremiumTime()
-	if currentTime < seconds then
-		return false
-	end
+	if currentTime < seconds then return false end
 
 	self:setPremiumTime(currentTime - seconds)
 	return true
 end
 
-function Player.getPremiumDays(self)
-	return math.floor(self:getPremiumTime() / 86400)
-end
+function Player.getPremiumDays(self) return math.floor(self:getPremiumTime() / 86400) end
 
-function Player.addPremiumDays(self, days)
-	return self:addPremiumTime(days * 86400)
-end
+function Player.addPremiumDays(self, days) return self:addPremiumTime(days * 86400) end
 
-function Player.removePremiumDays(self, days)
-	return self:removePremiumTime(days * 86400)
-end
+function Player.removePremiumDays(self, days) return self:removePremiumTime(days * 86400) end
 
 function Player.isPremium(self)
-	return self:getPremiumTime() > 0 or configManager.getBoolean(configKeys.FREE_PREMIUM) or self:hasFlag(PlayerFlag_IsAlwaysPremium)
+	return self:getPremiumTime() > 0 or configManager.getBoolean(configKeys.FREE_PREMIUM) or
+		       self:hasFlag(PlayerFlag_IsAlwaysPremium)
 end
 
+---@param message string|number
 function Player.sendCancelMessage(self, message)
-	if type(message) == "number" then
-		message = Game.getReturnMessage(message)
-	end
+	if type(message) == "number" then message = Game.getReturnMessage(message) end
 	return self:sendTextMessage(MESSAGE_STATUS_SMALL, message)
 end
 
-function Player.isUsingOtClient(self)
-	return self:getClient().os >= CLIENTOS_OTCLIENT_LINUX
-end
+function Player.isUsingOtClient(self) return self:getClient().os >= CLIENTOS_OTCLIENT_LINUX end
 
 function Player.sendExtendedOpcode(self, opcode, buffer)
-	if not self:isUsingOtClient() then
-		return false
-	end
+	if not self:isUsingOtClient() then return false end
 
-	local networkMessage = NetworkMessage()
+	local networkMessage<close> = NetworkMessage()
 	networkMessage:addByte(0x32)
 	networkMessage:addByte(opcode)
 	networkMessage:addString(buffer)
 	networkMessage:sendToPlayer(self)
-	networkMessage:delete()
 	return true
-end
-
-APPLY_SKILL_MULTIPLIER = true
-local addSkillTriesFunc = Player.addSkillTries
-function Player.addSkillTries(...)
-	APPLY_SKILL_MULTIPLIER = false
-	local ret = addSkillTriesFunc(...)
-	APPLY_SKILL_MULTIPLIER = true
-	return ret
-end
-
-local addManaSpentFunc = Player.addManaSpent
-function Player.addManaSpent(...)
-	APPLY_SKILL_MULTIPLIER = false
-	local ret = addManaSpentFunc(...)
-	APPLY_SKILL_MULTIPLIER = true
-	return ret
 end
 
 -- Always pass the number through the isValidMoney function first before using the transferMoneyTo
 function Player.transferMoneyTo(self, target, amount)
-	if not target then
-		return false
-	end
+	if not target then return false end
 
 	-- See if you can afford this transfer
 	local balance = self:getBankBalance()
-	if amount > balance then
-		return false
-	end
+	if amount > balance then return false end
 
 	-- See if player is online
 	local targetPlayer = Player(target.guid)
 	if targetPlayer then
 		targetPlayer:setBankBalance(targetPlayer:getBankBalance() + amount)
 	else
-		db.query("UPDATE `players` SET `balance` = `balance` + " .. amount .. " WHERE `id` = '" .. target.guid .. "'")
+		db.query("UPDATE `players` SET `balance` = `balance` + " .. amount .. " WHERE `id` = '" ..
+			         target.guid .. "'")
 	end
 
 	self:setBankBalance(self:getBankBalance() - amount)
@@ -163,9 +126,7 @@ end
 
 function Player.canCarryMoney(self, amount)
 	-- Anyone can carry as much imaginary money as they desire
-	if amount == 0 then
-		return true
-	end
+	if amount == 0 then return true end
 
 	-- The 3 below loops will populate these local variables
 	local totalWeight = 0
@@ -189,32 +150,24 @@ function Player.canCarryMoney(self, amount)
 	end
 
 	-- If player don't have enough capacity to carry this money
-	if self:getFreeCapacity() < totalWeight then
-		return false
-	end
+	if self:getFreeCapacity() < totalWeight then return false end
 
 	-- If player don't have enough available inventory slots to carry this money
-	local backpack = self:getSlotItem(CONST_SLOT_BACKPACK)
-	if not backpack or backpack:getEmptySlots(true) < inventorySlots then
-		return false
-	end
+	local backpack = self:getSlotItem(CONST_SLOT_BACKPACK) --[[@as Container]]
+	if not backpack or backpack:getEmptySlots(true) < inventorySlots then return false end
 	return true
 end
 
 function Player.withdrawMoney(self, amount)
 	local balance = self:getBankBalance()
-	if amount > balance or not self:addMoney(amount) then
-		return false
-	end
+	if amount > balance or not self:addMoney(amount) then return false end
 
 	self:setBankBalance(balance - amount)
 	return true
 end
 
 function Player.depositMoney(self, amount)
-	if not self:removeMoney(amount) then
-		return false
-	end
+	if not self:removeMoney(amount) then return false end
 
 	self:setBankBalance(self:getBankBalance() + amount)
 	return true
@@ -231,11 +184,15 @@ function Player.removeTotalMoney(self, amount)
 			self:removeMoney(moneyCount)
 			local remains = amount - moneyCount
 			self:setBankBalance(bankCount - remains)
-			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d from inventory and %d gold from bank account. Your account balance is now %d gold."):format(moneyCount, amount - moneyCount, self:getBankBalance()))
+			self:sendTextMessage(MESSAGE_INFO_DESCR,
+			                     ("Paid %d from inventory and %d gold from bank account. Your account balance is now %d gold."):format(
+				                     moneyCount, amount - moneyCount, self:getBankBalance()))
 			return true
 		else
 			self:setBankBalance(bankCount - amount)
-			self:sendTextMessage(MESSAGE_INFO_DESCR, ("Paid %d gold from bank account. Your account balance is now %d gold."):format(amount, self:getBankBalance()))
+			self:sendTextMessage(MESSAGE_INFO_DESCR,
+			                     ("Paid %d gold from bank account. Your account balance is now %d gold."):format(
+				                     amount, self:getBankBalance()))
 			return true
 		end
 	end
@@ -246,9 +203,12 @@ function Player.addLevel(self, amount, round)
 	round = round or false
 	local level, amount = self:getLevel(), amount or 1
 	if amount > 0 then
-		return self:addExperience(Game.getExperienceForLevel(level + amount) - (round and self:getExperience() or Game.getExperienceForLevel(level)))
+		return self:addExperience(Game.getExperienceForLevel(level + amount) -
+			                          (round and self:getExperience() or Game.getExperienceForLevel(level)))
 	else
-		return self:removeExperience(((round and self:getExperience() or Game.getExperienceForLevel(level)) - Game.getExperienceForLevel(level + amount)))
+		return self:removeExperience(
+			       ((round and self:getExperience() or Game.getExperienceForLevel(level)) -
+				       Game.getExperienceForLevel(level + amount)))
 	end
 end
 
@@ -307,8 +267,148 @@ end
 
 function Player.getWeaponType(self)
 	local weapon = self:getSlotItem(CONST_SLOT_LEFT)
-	if weapon then
-		return weapon:getType():getWeaponType()
-	end
+	if weapon then return weapon:getType():getWeaponType() end
 	return WEAPON_NONE
+end
+
+function Player.addTibiaCoins(self, tibiaCoins)
+	return self:setTibiaCoins(self:getTibiaCoins() + tibiaCoins)
+end
+
+function Player.removeTibiaCoins(self, removeCoins)
+	local tibiaCoins = self:getTibiaCoins()
+	if tibiaCoins < removeCoins then return false end
+	return self:setTibiaCoins(tibiaCoins - removeCoins)
+end
+
+function Player.setExhaustion(self, key, milliseconds)
+	return self:setStorageValue(key, os.mtime() + milliseconds)
+end
+
+function Player.getExhaustion(self, key)
+	local milliseconds = self:getStorageValue(key)
+	if not milliseconds then return 0 end
+	return math.max(0, os.mtime() - milliseconds)
+end
+
+function Player.hasExhaustion(self, key) return self:getExhaustion(key) > 0 end
+
+---@param type ExperienceRateType
+---@param value integer
+function Player:addExperienceRate(type, value)
+	return self:setExperienceRate(type, self:getExperienceRate(type) + value)
+end
+
+do
+	if not nextUseStaminaTime then nextUseStaminaTime = {} end
+
+	local function useStamina(player)
+		local staminaMinutes = player:getStamina()
+		if staminaMinutes == 0 then return end
+
+		local playerId = player:getId()
+		if not nextUseStaminaTime[playerId] then nextUseStaminaTime[playerId] = 0 end
+
+		local currentTime = os.time()
+		local timePassed = currentTime - nextUseStaminaTime[playerId]
+		if timePassed <= 0 then return end
+
+		if timePassed > 60 then
+			if staminaMinutes > 2 then
+				staminaMinutes = staminaMinutes - 2
+			else
+				staminaMinutes = 0
+			end
+			nextUseStaminaTime[playerId] = currentTime + 120
+		else
+			staminaMinutes = staminaMinutes - 1
+			nextUseStaminaTime[playerId] = currentTime + 60
+		end
+		player:setStamina(math.floor(staminaMinutes))
+	end
+
+	function Player:updateStamina()
+		if not configManager.getBoolean(configKeys.STAMINA_SYSTEM) then return false end
+
+		useStamina(self)
+
+		local staminaMinutes = self:getStamina()
+		if staminaMinutes > 2400 and self:isPremium() then
+			self:setExperienceRate(ExperienceRateType.STAMINA, 150)
+		elseif staminaMinutes <= 840 then
+			self:setExperienceRate(ExperienceRateType.STAMINA, 100)
+		end
+		return true
+	end
+
+	-- Guild Balance Functions
+	function Player.depositGuildMoney(self, amount)
+		local guild = self:getGuild()
+		if not guild then
+			return false, "You are not in a guild."
+		end
+
+		if not self:removeMoney(amount) then
+			return false, "You don't have enough money."
+		end
+
+		guild:setBankBalance(guild:getBankBalance() + amount)
+		return true, "Successfully deposited " .. amount .. " gold to guild bank."
+	end
+
+	function Player.withdrawGuildMoney(self, amount)
+		local guild = self:getGuild()
+		if not guild then
+			return false, "You are not in a guild."
+		end
+
+		-- Check if player has permission (Leader or Vice-Leader)
+		if self:getGuid() ~= guild:getOwnerGUID() and self:getGuildLevel() ~= 2 then
+			return false, "Only guild leaders and vice-leaders can withdraw money."
+		end
+
+		if amount > guild:getBankBalance() then
+			return false, "Guild doesn't have enough money."
+		end
+
+		if not self:addMoney(amount) then
+			return false, "You can't carry that much money."
+		end
+
+		guild:setBankBalance(guild:getBankBalance() - amount)
+		return true, "Successfully withdrew " .. amount .. " gold from guild bank."
+	end
+
+	function Player.transferGuildMoneyToPlayer(self, targetPlayer, amount)
+		local guild = self:getGuild()
+		if not guild then
+			return false, "You are not in a guild."
+		end
+
+		-- Check if player has permission (Leader or Vice-Leader)
+		if self:getGuid() ~= guild:getOwnerGUID() and self:getGuildLevel() ~= 2 then
+			return false, "Only guild leaders and vice-leaders can transfer money."
+		end
+
+		if amount > guild:getBankBalance() then
+			return false, "Guild doesn't have enough money."
+		end
+
+		local target = Player(targetPlayer)
+		if not target then
+			return false, "Target player not found."
+		end
+
+		guild:setBankBalance(guild:getBankBalance() - amount)
+		target:setBankBalance(target:getBankBalance() + amount)
+		return true, "Successfully transferred " .. amount .. " gold to " .. target:getName() .. "."
+	end
+
+	function Player.getGuildBalance(self)
+		local guild = self:getGuild()
+		if not guild then
+			return 0
+		end
+		return guild:getBankBalance()
+	end
 end

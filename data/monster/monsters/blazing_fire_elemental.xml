@@ -47,6 +47,5 @@
 		<item name="fiery heart" chance="6300" />
 		<item name="glimmering soil" chance="4000" />
 		<item name="flaming arrow" countmax="3" chance="3600" />
-		<item id="13757" chance="740" /><!-- coal -->
 	</loot>
 </monster>

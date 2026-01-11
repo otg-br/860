@@ -5,11 +5,8 @@ function onLogin(player)
 		loginStr = loginStr .. " Please choose your outfit."
 		player:sendOutfitWindow()
 	else
-		if loginStr ~= "" then
-			player:sendTextMessage(MESSAGE_STATUS_DEFAULT, loginStr)
-		end
-
-		loginStr = string.format("Your last visit in %s: %s.", serverName, os.date("%d %b %Y %X", player:getLastLoginSaved()))
+		loginStr = string.format("Your last visit in %s: %s.", serverName,
+		                         os.date("%d %b %Y %X", player:getLastLoginSaved()))
 	end
 	player:sendTextMessage(MESSAGE_STATUS_DEFAULT, loginStr)
 
@@ -18,9 +15,7 @@ function onLogin(player)
 	local promotion = vocation:getPromotion()
 	if player:isPremium() then
 		local value = player:getStorageValue(PlayerStorageKeys.promotion)
-		if value == 1 then
-			player:setVocation(promotion)
-		end
+		if value and value == 1 then player:setVocation(promotion) end
 	elseif not promotion then
 		player:setVocation(vocation:getDemotion())
 	end
@@ -28,5 +23,8 @@ function onLogin(player)
 	-- Events
 	player:registerEvent("PlayerDeath")
 	player:registerEvent("DropLoot")
+
+	-- Update Experience Rate Stamina
+	player:updateStamina()
 	return true
 end

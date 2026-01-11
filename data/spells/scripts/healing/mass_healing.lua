@@ -6,7 +6,7 @@ combat:setArea(createCombatArea(AREA_CIRCLE3X3))
 
 local healMonsters = false
 
-function onTargetCreature(creature, target)
+local function callback(creature, target)
 	local player = creature:getPlayer()
 	local min = (player:getLevel() / 5) + (player:getMagicLevel() * 4.6) + 100
 	local max = (player:getLevel() / 5) + (player:getMagicLevel() * 9.6) + 125
@@ -18,12 +18,11 @@ function onTargetCreature(creature, target)
 		end
 	end
 
-	doTargetCombatHealth(creature:getId(), target, COMBAT_HEALING, min, max, CONST_ME_NONE)
+	doTargetCombatHealth(creature:getId(), target, COMBAT_HEALING, min, max,
+	                     CONST_ME_NONE)
 	return true
 end
 
-combat:setCallback(CALLBACK_PARAM_TARGETCREATURE, "onTargetCreature")
+combat:setCallback(CallBackParam.TARGETCREATURE, callback)
 
-function onCastSpell(creature, variant)
-	return combat:execute(creature, variant)
-end
+function onCastSpell(creature, variant) return combat:execute(creature, variant) end

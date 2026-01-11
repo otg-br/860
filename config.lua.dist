@@ -1,3 +1,26 @@
+-- Protocol things
+-- NOTE: The maximum number of outfits only applies to cip client, OTC will use 255
+maxProtocolOutfits = 50
+
+
+-- true = kick enabled, false = kick disabled (default)
+dllCheckKick = true 
+
+-- time in seconds (optional usage)
+dllCheckKickTime = 5
+
+-- Account Manager
+accountManager = true
+namelockManager = true
+newPlayerChooseVoc = true
+newPlayerSpawnPosX = 0
+newPlayerSpawnPosY = 0
+newPlayerSpawnPosZ = 0
+newPlayerTownId = 1
+newPlayerLevel = 1
+newPlayerMagicLevel = 0
+generateAccountNumber = false
+
 -- Combat settings
 -- NOTE: valid values for worldType are: "pvp", "no-pvp" and "pvp-enforced"
 worldType = "pvp"
@@ -16,6 +39,8 @@ stairJumpExhaustion = 2000
 experienceByKillingPlayers = false
 expFromPlayersLevelRange = 75
 pzLockSkullAttacker = false
+allowAutoAttackWithoutExhaustion = true
+allowCastingWhileWalking = true
 
 -- Connection Config
 -- NOTE: maxPlayers set to 0 means no limit
@@ -26,11 +51,11 @@ loginProtocolPort = 7171
 gameProtocolPort = 7172
 statusProtocolPort = 7171
 maxPlayers = 0
-motd = "Bem vindos ao Otg Server 8.60!"
+motd = "Welcome to The Forgotten Server!"
 onePlayerOnlinePerAccount = true
 allowClones = false
 allowWalkthrough = true
-serverName = "Otg Server"
+serverName = "Forgotten"
 statusTimeout = 5000
 replaceKickOnLogin = true
 maxPacketsPerSecond = 25
@@ -45,7 +70,7 @@ deathLosePercent = -1
 -- NOTE: set housePriceEachSQM to -1 to disable the ingame buy house functionality
 -- NOTE: valid values for houseRentPeriod are: "daily", "weekly", "monthly", "yearly"
 -- use any other value to disable the rent system
-housePriceEachSQM = 10000
+housePriceEachSQM = 1000
 houseRentPeriod = "never"
 houseOwnedByAccount = false
 houseDoorShowPrice = true
@@ -54,6 +79,33 @@ onlyInvitedCanMoveHouseItems = true
 -- Item Usage
 timeBetweenActions = 200
 timeBetweenExActions = 1000
+
+-- Fast Potions Configuration
+fastPotions = true
+fastPotionIds = { 26031, 26030, 8473, 7591, 8472, 7588, 26029, 7590, 7589, 7620, 7618, 8704, 8474 }
+
+-- Teleport Block Configuration
+-- IDs of teleports where it is not allowed to throw items
+blockedTeleportIds = { 1387, 11796, 11797, 12509, 12510 }
+
+-- Rates for reward boss system
+-- If a player meets their share of the expectedScore (totalScore/contributors), they receive a lootRate according to the rewardBaseRate.
+rewardBaseRate = 1
+rewardRateDamageDone = 1
+rewardRateDamageTaken = 0.5
+rewardRateHealingDone = 0.3
+
+-- Scheduler Task Intervals
+MOVE_CREATURE_INTERVAL = 250
+RANGE_MOVE_CREATURE_INTERVAL = 250
+RANGE_MOVE_ITEM_INTERVAL = 250
+RANGE_USE_ITEM_INTERVAL = 250
+RANGE_USE_ITEM_EX_INTERVAL = 250
+RANGE_USE_WITH_CREATURE_INTERVAL = 250
+RANGE_ROTATE_ITEM_INTERVAL = 250
+-- RANGE_BROWSE_FIELD_INTERVAL = 250
+-- RANGE_WRAP_ITEM_INTERVAL = 250
+-- RANGE_REQUEST_TRADE_INTERVAL = 250
 
 -- Map
 -- NOTE: set mapName WITHOUT .otbm at the end
@@ -68,12 +120,11 @@ maxMarketOffersAtATimePerPlayer = 100
 
 -- MySQL
 mysqlHost = "127.0.0.1"
-mysqlUser = "user"
-mysqlPass = "password"
-mysqlDatabase = "database"
+mysqlUser = "forgottenserver"
+mysqlPass = ""
+mysqlDatabase = "forgottenserver"
 mysqlPort = 3306
 mysqlSock = ""
-passwordType = "sha1"
 
 -- Misc.
 -- NOTE: classicAttackSpeed set to true makes players constantly attack at regular
@@ -81,12 +132,13 @@ passwordType = "sha1"
 -- may cause high CPU usage with many players and potentially affect performance!
 -- NOTE: forceMonsterTypesOnLoad loads all monster types on startup to validate them.
 -- You can disable it to save some memory if you don't see any errors at startup.
+-- bedOfflineTraining to true enables offline training while in bed. If set to false, the player can only sleep in bed without training.
 allowChangeOutfit = true
-freePremium = true
+freePremium = false
 kickIdlePlayerAfterMinutes = 15
 maxMessageBuffer = 4
-emoteSpells = false
-classicEquipmentSlots = false
+emoteSpells = true
+classicEquipmentSlots = true
 classicAttackSpeed = false
 showScriptsLogInConsole = false
 showOnlineStatusInCharlist = false
@@ -96,8 +148,11 @@ minimumLevelToSendPrivate = 1
 premiumToSendPrivate = false
 forceMonsterTypesOnLoad = true
 cleanProtectionZones = false
-luaItemDesc = false
+bedOfflineTraining = true
 showPlayerLogInConsole = true
+healthGainColour = 95
+manaGainColour = 5
+manaLossColour = 5
 
 -- VIP and Depot limits
 -- NOTE: you can set custom limits per group in data/XML/groups.xml
@@ -105,6 +160,10 @@ vipFreeLimit = 20
 vipPremiumLimit = 100
 depotFreeLimit = 2000
 depotPremiumLimit = 10000
+
+-- Max player allowed on a dummy
+maxAllowedOnADummy = 5
+rateExerciseTrainingSpeed = 1.0
 
 -- World Light
 -- NOTE: if defaultWorldLight is set to true the world light algorithm will
@@ -132,6 +191,12 @@ experienceStages = {
 	{ minlevel = 51, maxlevel = 100, multiplier = 4 },
 	{ minlevel = 101, multiplier = 3 }
 }
+
+-- Speed
+-- NOTE: maxPlayerSpeed is the absolute fastest a player can travel, it is not recommended to change this.
+-- 5000 for GODs, 900 for players.
+maxPlayerSpeed = 900
+maxGodSpeed = 5000
 
 -- Rates
 -- NOTE: rateExp is not used if you have enabled stages above
@@ -165,7 +230,7 @@ defaultPriority = "high"
 startupDatabaseOptimization = false
 
 -- Status Server Information
-ownerName = "otg server"
+ownerName = ""
 ownerEmail = ""
-url = "https://github.com/otg-br/860"
-location = "Brazil"
+url = "https://otland.net/"
+location = "Sweden"
